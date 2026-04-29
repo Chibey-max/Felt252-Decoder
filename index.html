@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>felt252 Decoder — Starknet Error Tool</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="grid-bg"></div>
+
+  <header>
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-bracket">[</span>
+        <span class="logo-text">felt252</span>
+        <span class="logo-bracket">]</span>
+        <span class="logo-sub">decoder</span>
+      </div>
+      <div class="header-tag">Starknet dev tool</div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <p class="hero-label">// what does this error mean?</p>
+      <h1 class="hero-title">Decode Starknet<br /><em>felt252</em> errors</h1>
+      <p class="hero-desc">
+        Starknet encodes short strings as packed ASCII inside a felt252 field element.
+        Paste the raw decimal from your error trace and get the human-readable message instantly.
+      </p>
+    </section>
+
+    <section class="decoder-section">
+      <div class="decoder-card">
+        <div class="card-header">
+          <span class="card-label">Input</span>
+          <span class="card-hint">felt252 decimal number</span>
+        </div>
+        <div class="input-wrapper">
+          <textarea
+            id="input"
+            placeholder="2804988942864152508488475094962468554181127825702932543077"
+            spellcheck="false"
+            autocomplete="off"
+          ></textarea>
+          <button class="clear-btn" id="clearBtn" onclick="clearInput()" title="Clear">✕</button>
+        </div>
+
+        <div class="decode-btn-row">
+          <button class="decode-btn" onclick="decode()">
+            <span class="btn-icon">→</span>
+            Decode
+          </button>
+          <button class="paste-btn" onclick="pasteFromClipboard()">
+            <span class="btn-icon">⌘</span>
+            Paste
+          </button>
+        </div>
+
+        <div class="result-area" id="resultArea">
+          <div class="result-idle" id="resultIdle">
+            <div class="idle-icon">⬡</div>
+            <p>Paste a felt252 number to decode</p>
+          </div>
+          <div class="result-output hidden" id="resultOutput">
+            <div class="result-header">
+              <span class="result-label-text">Decoded string</span>
+              <button class="copy-btn" onclick="copyResult()" id="copyBtn">Copy</button>
+            </div>
+            <div class="result-value" id="resultValue"></div>
+            <div class="result-meta" id="resultMeta"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="steps-card">
+        <p class="steps-title">// how it works</p>
+        <div class="steps-list">
+          <div class="step">
+            <div class="step-num">01</div>
+            <div class="step-body">
+              <p class="step-name">Hex conversion</p>
+              <p class="step-detail">The decimal is converted to hexadecimal using <code>BigInt.toString(16)</code></p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">02</div>
+            <div class="step-body">
+              <p class="step-name">Byte slicing</p>
+              <p class="step-detail">Hex string is split into 2-character byte pairs</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">03</div>
+            <div class="step-body">
+              <p class="step-name">ASCII decode</p>
+              <p class="step-detail">Each byte is parsed as an ASCII character code via <code>String.fromCharCode</code></p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">04</div>
+            <div class="step-body">
+              <p class="step-name">Cairo short string</p>
+              <p class="step-detail">Cairo packs strings ≤ 31 chars into a single felt252 field element</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="examples-section">
+      <p class="examples-title">// common starknet errors</p>
+      <div class="examples-grid" id="examplesGrid"></div>
+    </section>
+
+    <section class="history-section" id="historySection" style="display:none;">
+      <div class="history-header">
+        <p class="history-title">// recent decodes</p>
+        <button class="clear-history-btn" onclick="clearHistory()">Clear all</button>
+      </div>
+      <div class="history-list" id="historyList"></div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <span class="footer-text">felt252 decoder — built for Starknet devs</span>
+      <span class="footer-mono">cairo · starknet · sncast</span>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
