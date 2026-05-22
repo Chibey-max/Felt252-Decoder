@@ -22,17 +22,147 @@
   </header>
 
   <main>
-    <h1 class="hero-title">Decode, Convert, and Debug <em>Starknet/Cairo</em> data</h1>
-    <p class="hero-desc">Multi-file refactor with practical tools: hex↔decimal, text↔hex, felt252 short-string decode, uint256 split, batch decode, and calldata inspection.</p>
+    <h1 class="hero-title">Starknet/Cairo <em>Developer Toolkit</em></h1>
+    <p class="hero-desc">Selector toolkit, ABI calldata encode/decode, Cairo type pack/unpack, event decoding, hash tools, and classic felt/hex/text converters.</p>
 
     <div class="tabs" id="tabs">
-      <button class="tab-btn active" data-tab="numeric">Numeric</button>
+      <button class="tab-btn active" data-tab="selector">Selector</button>
+      <button class="tab-btn" data-tab="abi">ABI</button>
+      <button class="tab-btn" data-tab="types">Types</button>
+      <button class="tab-btn" data-tab="events">Events</button>
+      <button class="tab-btn" data-tab="hash">Hash</button>
+      <button class="tab-btn" data-tab="numeric">Numeric</button>
       <button class="tab-btn" data-tab="texthex">Text/Hex</button>
       <button class="tab-btn" data-tab="felt">Felt252</button>
       <button class="tab-btn" data-tab="batch">Batch</button>
     </div>
 
-    <section class="panel active" id="panel-numeric">
+    <section class="panel active" id="panel-selector">
+      <div class="grid">
+        <div class="card">
+          <div class="card-head"><span>Function Selector</span><span>keccak(name) mod 2^251</span></div>
+          <div class="card-body">
+            <input id="selectorName" placeholder="transfer / transfer_from / approve" />
+            <div class="row">
+              <button class="primary" id="selectorRun">Compute selector</button>
+              <button id="selectorPaste">Paste</button>
+            </div>
+            <div class="kv" id="selectorOut"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span>Selector Lookup</span><span>from ABI functions</span></div>
+          <div class="card-body">
+            <textarea id="selectorAbi" placeholder='Paste ABI JSON array here...'></textarea>
+            <input id="selectorNeedle" placeholder="selector decimal or hex (0x...)" />
+            <div class="row"><button class="primary" id="selectorLookupRun">Find matching function(s)</button></div>
+            <div class="result" id="selectorLookupOut"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-abi">
+      <div class="grid">
+        <div class="card">
+          <div class="card-head"><span>ABI Calldata Encoder</span><span>subset: felt/u256/address/bool/array</span></div>
+          <div class="card-body">
+            <textarea id="abiJson" placeholder='Paste ABI JSON array here...'></textarea>
+            <input id="abiFn" placeholder="Function name, e.g. transfer" />
+            <textarea id="abiArgs" placeholder='JSON args object, e.g. {"recipient":"0x123","amount":{"low":"1","high":"0"}}'></textarea>
+            <div class="row"><button class="primary" id="abiEncodeRun">Encode calldata</button></div>
+            <div class="result" id="abiEncodeOut"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span>ABI Return Decoder</span><span>same subset</span></div>
+          <div class="card-body">
+            <textarea id="abiDecodeJson" placeholder='Paste ABI JSON array here...'></textarea>
+            <input id="abiDecodeFn" placeholder="Function name" />
+            <textarea id="abiReturnData" placeholder='Return felts: csv/newline/space e.g. 1,0'></textarea>
+            <div class="row"><button class="primary" id="abiDecodeRun">Decode return data</button></div>
+            <div class="result" id="abiDecodeOut"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-types">
+      <div class="grid">
+        <div class="card">
+          <div class="card-head"><span>u256 Pack/Unpack</span><span>low/high ⇄ bigint</span></div>
+          <div class="card-body">
+            <input id="u256Big" placeholder="Big integer value" />
+            <div class="row"><button class="primary" id="u256SplitRun">Split to low/high</button></div>
+            <div class="kv" id="u256SplitOut"></div>
+            <hr class="sep" />
+            <input id="u256Low" placeholder="low" />
+            <input id="u256High" placeholder="high" />
+            <div class="row"><button class="primary" id="u256PackRun">Compose to bigint</button></div>
+            <div class="kv" id="u256PackOut"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span>ByteArray & Address</span><span>Cairo-friendly helpers</span></div>
+          <div class="card-body">
+            <input id="baText" placeholder="Text to ByteArray felts" />
+            <div class="row"><button class="primary" id="baEncodeRun">Encode ByteArray</button></div>
+            <div class="result" id="baEncodeOut"></div>
+            <hr class="sep" />
+            <textarea id="baFelts" placeholder="ByteArray felts (len, data..., pending_word, pending_len)"></textarea>
+            <div class="row"><button class="primary" id="baDecodeRun">Decode ByteArray</button></div>
+            <div class="result" id="baDecodeOut"></div>
+            <hr class="sep" />
+            <input id="addrInput" placeholder="ContractAddress/ClassHash input" />
+            <div class="row"><button class="primary" id="addrNormRun">Normalize</button></div>
+            <div class="kv" id="addrNormOut"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-events">
+      <div class="grid">
+        <div class="card">
+          <div class="card-head"><span>Event Decoder</span><span>ABI + keys/data</span></div>
+          <div class="card-body">
+            <textarea id="eventAbi" placeholder='Paste ABI JSON array here...'></textarea>
+            <input id="eventName" placeholder="Event name (optional)" />
+            <textarea id="eventKeys" placeholder="keys: csv/newline/space (first is selector/topic)"></textarea>
+            <textarea id="eventData" placeholder="data: csv/newline/space"></textarea>
+            <div class="row"><button class="primary" id="eventDecodeRun">Decode event</button></div>
+            <div class="result" id="eventDecodeOut"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span>Notes</span><span>decoder scope</span></div>
+          <div class="card-body">
+            <p class="muted">Supports a practical subset of Cairo ABI types: felt/felt252, bool, ContractAddress, u256, and arrays of these. Complex nested structs/enums can be added next.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-hash">
+      <div class="grid">
+        <div class="card">
+          <div class="card-head"><span>Keccak-256</span><span>text input</span></div>
+          <div class="card-body">
+            <input id="hashText" placeholder="text to hash" />
+            <div class="row"><button class="primary" id="hashRun">Hash</button></div>
+            <div class="kv" id="hashOut"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span>Pedersen/Poseidon Placeholder</span><span>next step</span></div>
+          <div class="card-body">
+            <p class="muted">To compute canonical Starknet Pedersen/Poseidon exactly, we should add a tiny crypto dependency (starknet.js or noble-based implementation). Keccak + selector math is fully implemented now.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-numeric">
       <div class="grid">
         <div class="card">
           <div class="card-head"><span>Hex ⇄ Decimal</span><span>shell-style converter</span></div>
@@ -45,7 +175,6 @@
             <div class="kv" id="numOut"></div>
           </div>
         </div>
-
         <div class="card">
           <div class="card-head"><span>Quick tests</span><span>click to load</span></div>
           <div class="card-body" id="quickNumeric"></div>
@@ -66,7 +195,6 @@
             <div class="kv" id="txtOut"></div>
           </div>
         </div>
-
         <div class="card">
           <div class="card-head"><span>Hex → ASCII Text</span><span>xxd -r -p style</span></div>
           <div class="card-body">
@@ -95,7 +223,6 @@
             <div class="result" id="decodeResult"><div class="muted">Paste a felt and decode short string.</div></div>
           </div>
         </div>
-
         <div class="card">
           <div class="card-head"><span>uint256 helper</span><span>split low/high</span></div>
           <div class="card-body">
@@ -124,7 +251,6 @@
             <div class="result" id="batchResult"></div>
           </div>
         </div>
-
         <div class="card">
           <div class="card-head"><span>Calldata inspector</span><span>csv/newline/space</span></div>
           <div class="card-body">
@@ -146,6 +272,7 @@
 
   <div class="toast" id="toast"></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/js-sha3@0.9.3/src/sha3.min.js"></script>
   <script src="./app.js"></script>
 </body>
 </html>

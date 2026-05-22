@@ -34,6 +34,7 @@ button:hover{border-color:var(--border2)}button.primary:hover{background:var(--a
 .quick-item{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:.5rem .65rem;margin-bottom:7px;cursor:pointer;font-family:var(--mono);font-size:12px}
 .quick-item:hover{border-color:var(--border2)}
 .pill{display:inline-block;margin-top:.6rem;border:1px solid var(--border);border-radius:999px;padding:2px 8px;font-size:11px;font-family:var(--mono);color:var(--text2)}
+hr.sep{border:none;border-top:1px solid var(--border);margin:14px 0}
 footer{border-top:1px solid var(--border);padding:1rem 1.2rem;color:var(--text3);font-size:12px}
 .footer-inner{max-width:1024px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--surface2);border:1px solid var(--border2);border-radius:999px;padding:.45rem .95rem;font-family:var(--mono);font-size:12px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:100}
