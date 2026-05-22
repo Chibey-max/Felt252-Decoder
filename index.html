@@ -3,836 +3,149 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>felt252 Decoder — Starknet Error Tool</title>
+  <title>Dave Felt252 Decoder — Starknet/Cairo Toolkit</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --bg: #0a0a0f;
-      --bg2: #0f0f18;
-      --bg3: #13131f;
-      --surface: #16161f;
-      --surface2: #1c1c28;
-      --border: rgba(255,255,255,0.07);
-      --border2: rgba(255,255,255,0.12);
-      --accent: #7b61ff;
-      --accent2: #a78bfa;
-      --accent-dim: rgba(123,97,255,0.15);
-      --accent-glow: rgba(123,97,255,0.08);
-      --green: #34d399;
-      --red: #f87171;
-      --text: #e8e8f0;
-      --text2: #9090a8;
-      --text3: #5a5a72;
-      --mono: 'IBM Plex Mono', monospace;
-      --sans: 'Space Grotesk', sans-serif;
-      --radius: 12px;
-      --radius-lg: 16px;
-    }
-
-    html { scroll-behavior: smooth; }
-
-    body {
-      font-family: var(--sans);
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      overflow-x: hidden;
-      line-height: 1.6;
-    }
-
-    .grid-bg {
-      position: fixed;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(123,97,255,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(123,97,255,0.03) 1px, transparent 1px);
-      background-size: 48px 48px;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      border-bottom: 1px solid var(--border);
-      background: rgba(10,10,15,0.9);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-    }
-
-    .header-inner {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 1rem 1.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 2px;
-      font-family: var(--mono);
-      font-size: 15px;
-      font-weight: 500;
-    }
-
-    .logo-bracket { color: var(--accent); }
-    .logo-sub {
-      margin-left: 8px;
-      font-size: 12px;
-      color: var(--text3);
-      font-weight: 300;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    .header-tag {
-      font-size: 11px;
-      font-family: var(--mono);
-      color: var(--accent2);
-      background: var(--accent-dim);
-      border: 1px solid rgba(123,97,255,0.2);
-      padding: 3px 10px;
-      border-radius: 20px;
-      letter-spacing: 0.04em;
-    }
-
-    main {
-      position: relative;
-      z-index: 1;
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 0 1.5rem 4rem;
-    }
-
-    .hero {
-      padding: 4rem 0 3rem;
-    }
-
-    .hero-label {
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--accent);
-      letter-spacing: 0.06em;
-      margin-bottom: 1rem;
-      opacity: 0.8;
-    }
-
-    .hero-title {
-      font-size: clamp(2.2rem, 5vw, 3.5rem);
-      font-weight: 300;
-      line-height: 1.15;
-      letter-spacing: -0.02em;
-      margin-bottom: 1.25rem;
-    }
-
-    .hero-title em {
-      font-style: normal;
-      color: var(--accent2);
-      font-weight: 600;
-    }
-
-    .hero-desc {
-      font-size: 15px;
-      color: var(--text2);
-      max-width: 520px;
-      line-height: 1.7;
-      font-weight: 300;
-    }
-
-    .decoder-section {
-      display: grid;
-      grid-template-columns: 1fr 320px;
-      gap: 1.25rem;
-      margin-bottom: 3rem;
-    }
-
-    @media (max-width: 720px) {
-      .decoder-section { grid-template-columns: 1fr; }
-    }
-
-    .decoder-card, .steps-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      overflow: hidden;
-    }
-
-    .card-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1rem 1.25rem 0.75rem;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .card-label {
-      font-family: var(--mono);
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--text3);
-    }
-
-    .card-hint {
-      font-size: 11px;
-      color: var(--text3);
-      font-family: var(--mono);
-    }
-
-    .input-wrapper {
-      position: relative;
-      padding: 1rem 1.25rem 0;
-    }
-
-    textarea {
-      width: 100%;
-      font-family: var(--mono);
-      font-size: 13px;
-      line-height: 1.6;
-      color: var(--text);
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 0.875rem 2.5rem 0.875rem 1rem;
-      resize: vertical;
-      min-height: 100px;
-      transition: border-color 0.2s;
-      outline: none;
-    }
-
-    textarea::placeholder { color: var(--text3); }
-    textarea:focus { border-color: rgba(123,97,255,0.4); }
-
-    .clear-btn {
-      position: absolute;
-      top: 1.75rem;
-      right: 1.75rem;
-      background: none;
-      border: none;
-      color: var(--text3);
-      cursor: pointer;
-      font-size: 14px;
-      padding: 4px;
-      line-height: 1;
-      transition: color 0.15s;
-      display: none;
-    }
-
-    .clear-btn:hover { color: var(--text); }
-    .clear-btn.visible { display: block; }
-
-    .decode-btn-row {
-      display: flex;
-      gap: 8px;
-      padding: 0.75rem 1.25rem;
-    }
-
-    .decode-btn {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 0.7rem 1.5rem;
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      border-radius: var(--radius);
-      font-family: var(--sans);
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.15s;
-      letter-spacing: 0.02em;
-    }
-
-    .decode-btn:hover { background: var(--accent2); transform: translateY(-1px); }
-    .decode-btn:active { transform: scale(0.99); }
-
-    .paste-btn {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 0.7rem 1rem;
-      background: var(--surface2);
-      color: var(--text2);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      font-family: var(--sans);
-      font-size: 13px;
-      cursor: pointer;
-      transition: all 0.15s;
-      white-space: nowrap;
-    }
-
-    .paste-btn:hover { border-color: var(--border2); color: var(--text); }
-
-    .result-area {
-      margin: 0 1.25rem 1.25rem;
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      min-height: 120px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-    }
-
-    .result-idle {
-      text-align: center;
-      color: var(--text3);
-      padding: 2rem;
-    }
-
-    .idle-icon {
-      font-size: 24px;
-      margin-bottom: 0.5rem;
-      opacity: 0.3;
-    }
-
-    .result-idle p { font-size: 13px; }
-
-    .result-output {
-      width: 100%;
-      padding: 1rem;
-      align-self: stretch;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .result-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .result-label-text {
-      font-family: var(--mono);
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--text3);
-    }
-
-    .copy-btn {
-      font-size: 11px;
-      font-family: var(--mono);
-      color: var(--accent2);
-      background: var(--accent-dim);
-      border: 1px solid rgba(123,97,255,0.2);
-      padding: 2px 10px;
-      border-radius: 20px;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-
-    .copy-btn:hover { background: rgba(123,97,255,0.25); }
-
-    .result-value {
-      font-family: var(--mono);
-      font-size: 18px;
-      font-weight: 500;
-      color: var(--green);
-      word-break: break-all;
-      line-height: 1.4;
-    }
-
-    .result-value.error { color: var(--red); font-size: 14px; font-weight: 400; }
-
-    .result-meta {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--text3);
-    }
-
-    .hidden { display: none !important; }
-
-    .steps-card { padding: 1.25rem; }
-
-    .steps-title {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--accent);
-      letter-spacing: 0.06em;
-      margin-bottom: 1.25rem;
-      opacity: 0.7;
-    }
-
-    .steps-list { display: flex; flex-direction: column; gap: 1.25rem; }
-
-    .step { display: flex; gap: 12px; align-items: flex-start; }
-
-    .step-num {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--accent);
-      min-width: 24px;
-      margin-top: 2px;
-      opacity: 0.6;
-    }
-
-    .step-name {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text);
-      margin-bottom: 2px;
-    }
-
-    .step-detail {
-      font-size: 12px;
-      color: var(--text3);
-      line-height: 1.5;
-    }
-
-    .step-detail code {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--accent2);
-      background: var(--accent-dim);
-      padding: 1px 5px;
-      border-radius: 4px;
-    }
-
-    .examples-section { margin-bottom: 3rem; }
-
-    .section-title {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--accent);
-      letter-spacing: 0.06em;
-      margin-bottom: 1rem;
-      opacity: 0.7;
-    }
-
-    .examples-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 10px;
-    }
-
-    .example-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1rem;
-      cursor: pointer;
-      transition: all 0.15s;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .example-card:hover { border-color: var(--border2); transform: translateY(-2px); background: var(--surface2); }
-
-    .example-decoded {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--green);
-      margin-bottom: 4px;
-      font-family: var(--mono);
-    }
-
-    .example-context {
-      font-size: 11px;
-      color: var(--accent2);
-      font-family: var(--mono);
-      margin-bottom: 6px;
-      opacity: 0.7;
-    }
-
-    .example-number {
-      font-size: 10px;
-      font-family: var(--mono);
-      color: var(--text3);
-      word-break: break-all;
-      line-height: 1.4;
-    }
-
-    .history-section { margin-bottom: 3rem; }
-
-    .history-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1rem;
-    }
-
-    .clear-history-btn {
-      font-size: 11px;
-      font-family: var(--mono);
-      color: var(--text3);
-      background: none;
-      border: 1px solid var(--border);
-      padding: 3px 10px;
-      border-radius: 20px;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-
-    .clear-history-btn:hover { color: var(--red); border-color: rgba(248,113,113,0.3); }
-
-    .history-list { display: flex; flex-direction: column; gap: 6px; }
-
-    .history-item {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 0.75rem 1rem;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-
-    .history-item:hover { border-color: var(--border2); }
-
-    .history-decoded {
-      font-family: var(--mono);
-      font-size: 13px;
-      color: var(--green);
-      min-width: 180px;
-    }
-
-    .history-num {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--text3);
-      flex: 1;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .history-time {
-      font-size: 10px;
-      font-family: var(--mono);
-      color: var(--text3);
-      white-space: nowrap;
-    }
-
-    footer {
-      position: relative;
-      z-index: 1;
-      border-top: 1px solid var(--border);
-      padding: 1.25rem 1.5rem;
-    }
-
-    .footer-inner {
-      max-width: 900px;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .footer-text { font-size: 12px; color: var(--text3); }
-    .footer-mono { font-family: var(--mono); font-size: 11px; color: var(--text3); opacity: 0.5; }
-
-    .toast {
-      position: fixed;
-      bottom: 2rem;
-      left: 50%;
-      transform: translateX(-50%) translateY(20px);
-      background: var(--surface2);
-      border: 1px solid var(--border2);
-      color: var(--text);
-      font-family: var(--mono);
-      font-size: 13px;
-      padding: 0.6rem 1.25rem;
-      border-radius: 20px;
-      opacity: 0;
-      pointer-events: none;
-      transition: all 0.2s;
-      z-index: 999;
-      white-space: nowrap;
-    }
-
-    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .result-output:not(.hidden) { animation: fadeIn 0.2s ease; }
-    .example-card { animation: fadeIn 0.3s ease both; }
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
   <div class="grid-bg"></div>
 
   <header>
     <div class="header-inner">
-      <div class="logo">
-        <span class="logo-bracket">[</span>
-        <span>felt252</span>
-        <span class="logo-bracket">]</span>
-        <span class="logo-sub">decoder</span>
+      <div class="logo">[<span class="logo-accent">Dave felt252</span>] starknet toolkit</div>
+      <div class="header-actions">
+        <a class="header-link" href="https://github.com/Chibey-max" target="_blank" rel="noreferrer">@Chibey-max</a>
       </div>
-      <div class="header-tag">Starknet dev tool</div>
     </div>
   </header>
 
   <main>
-    <section class="hero">
-      <p class="hero-label">// what does this error mean?</p>
-      <h1 class="hero-title">Decode Starknet<br /><em>felt252</em> errors</h1>
-      <p class="hero-desc">Starknet encodes short strings as packed ASCII inside a felt252 field element. Paste the raw decimal from your error trace and get the human-readable message instantly.</p>
-    </section>
+    <h1 class="hero-title">Decode, Convert, and Debug <em>Starknet/Cairo</em> data</h1>
+    <p class="hero-desc">Multi-file refactor with practical tools: hex↔decimal, text↔hex, felt252 short-string decode, uint256 split, batch decode, and calldata inspection.</p>
 
-    <section class="decoder-section">
-      <div class="decoder-card">
-        <div class="card-header">
-          <span class="card-label">Input</span>
-          <span class="card-hint">felt252 decimal number</span>
-        </div>
-        <div class="input-wrapper">
-          <textarea id="input" placeholder="2804988942864152508488475094962468554181127825702932543077" spellcheck="false" autocomplete="off"></textarea>
-          <button class="clear-btn" id="clearBtn" onclick="clearInput()">✕</button>
-        </div>
-        <div class="decode-btn-row">
-          <button class="decode-btn" onclick="decode()">→ &nbsp;Decode</button>
-          <button class="paste-btn" onclick="pasteFromClipboard()">⌘ &nbsp;Paste</button>
-        </div>
-        <div class="result-area" id="resultArea">
-          <div class="result-idle" id="resultIdle">
-            <div class="idle-icon">⬡</div>
-            <p>Paste a felt252 number to decode</p>
-          </div>
-          <div class="result-output hidden" id="resultOutput">
-            <div class="result-header">
-              <span class="result-label-text">Decoded string</span>
-              <button class="copy-btn" onclick="copyResult()" id="copyBtn">Copy</button>
+    <div class="tabs" id="tabs">
+      <button class="tab-btn active" data-tab="numeric">Numeric</button>
+      <button class="tab-btn" data-tab="texthex">Text/Hex</button>
+      <button class="tab-btn" data-tab="felt">Felt252</button>
+      <button class="tab-btn" data-tab="batch">Batch</button>
+    </div>
+
+    <section class="panel active" id="panel-numeric">
+      <div class="grid">
+        <div class="card">
+          <div class="card-head"><span>Hex ⇄ Decimal</span><span>shell-style converter</span></div>
+          <div class="card-body">
+            <input id="numInput" placeholder="0xf4240 or 1000000" />
+            <div class="row">
+              <button class="primary" id="numRun">Convert</button>
+              <button id="numPaste">Paste</button>
             </div>
-            <div class="result-value" id="resultValue"></div>
-            <div class="result-meta" id="resultMeta"></div>
+            <div class="kv" id="numOut"></div>
           </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><span>Quick tests</span><span>click to load</span></div>
+          <div class="card-body" id="quickNumeric"></div>
         </div>
       </div>
+    </section>
 
-      <div class="steps-card">
-        <p class="steps-title">// how it works</p>
-        <div class="steps-list">
-          <div class="step">
-            <div class="step-num">01</div>
-            <div>
-              <p class="step-name">Hex conversion</p>
-              <p class="step-detail">Decimal converted to hex via <code>BigInt.toString(16)</code></p>
+    <section class="panel" id="panel-texthex">
+      <div class="grid">
+        <div class="card">
+          <div class="card-head"><span>ASCII Text → Hex/Dec</span><span>xxd-style</span></div>
+          <div class="card-body">
+            <input id="txtInput" placeholder="Dave" />
+            <div class="row">
+              <button class="primary" id="txtRun">Convert text</button>
+              <button id="txtPaste">Paste</button>
             </div>
+            <div class="kv" id="txtOut"></div>
           </div>
-          <div class="step">
-            <div class="step-num">02</div>
-            <div>
-              <p class="step-name">Byte slicing</p>
-              <p class="step-detail">Hex split into 2-character byte pairs</p>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><span>Hex → ASCII Text</span><span>xxd -r -p style</span></div>
+          <div class="card-body">
+            <input id="hexInput" placeholder="44617665 or 0x44415645" />
+            <div class="row">
+              <button class="primary" id="hexRun">Decode hex</button>
+              <button id="hexPaste">Paste</button>
             </div>
-          </div>
-          <div class="step">
-            <div class="step-num">03</div>
-            <div>
-              <p class="step-name">ASCII decode</p>
-              <p class="step-detail">Each byte parsed via <code>String.fromCharCode</code></p>
-            </div>
-          </div>
-          <div class="step">
-            <div class="step-num">04</div>
-            <div>
-              <p class="step-name">Cairo short string</p>
-              <p class="step-detail">Cairo packs strings ≤ 31 chars into a single felt252</p>
-            </div>
+            <div class="kv" id="hexOut"></div>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="examples-section">
-      <p class="section-title">// common starknet errors — click to try</p>
-      <div class="examples-grid" id="examplesGrid"></div>
+    <section class="panel" id="panel-felt">
+      <div class="grid">
+        <div class="card">
+          <div class="card-head"><span>Single felt decoder</span><span>dec or 0xhex</span></div>
+          <div class="card-body">
+            <textarea id="decodeInput" placeholder="2804988942864152508488475094962468554181127825702932543077"></textarea>
+            <div class="row">
+              <button class="primary" id="decodeRun">Decode</button>
+              <button id="decodePaste">Paste</button>
+              <button id="decodeClear">Clear</button>
+            </div>
+            <div class="result" id="decodeResult"><div class="muted">Paste a felt and decode short string.</div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><span>uint256 helper</span><span>split low/high</span></div>
+          <div class="card-body">
+            <input id="uInput" placeholder="Enter felt/hex/string input" />
+            <div class="row">
+              <button class="primary" id="uRun">Split</button>
+              <button id="uPaste">Paste</button>
+            </div>
+            <div class="kv" id="uOut"></div>
+            <div class="pill">felt max: 2^251 + 17·2^192 + 1</div>
+          </div>
+        </div>
+      </div>
     </section>
 
-    <section class="history-section" id="historySection" style="display:none;">
-      <div class="history-header">
-        <p class="section-title" style="margin-bottom:0;">// recent decodes</p>
-        <button class="clear-history-btn" onclick="clearHistory()">Clear all</button>
+    <section class="panel" id="panel-batch">
+      <div class="grid">
+        <div class="card">
+          <div class="card-head"><span>Batch decode</span><span>one felt per line</span></div>
+          <div class="card-body">
+            <textarea id="batchInput" placeholder="0x726573756c74\n521777237"></textarea>
+            <div class="row">
+              <button class="primary" id="batchRun">Decode batch</button>
+              <button id="batchPaste">Paste</button>
+            </div>
+            <div class="result" id="batchResult"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><span>Calldata inspector</span><span>csv/newline/space</span></div>
+          <div class="card-body">
+            <textarea id="calldataInput" placeholder="1709662608498200765433310943302104658958991953088, 521777237"></textarea>
+            <div class="row"><button class="primary" id="calldataRun">Inspect</button></div>
+            <div class="result" id="calldataResult"></div>
+          </div>
+        </div>
       </div>
-      <div class="history-list" id="historyList"></div>
     </section>
   </main>
 
   <footer>
     <div class="footer-inner">
-      <span class="footer-text">felt252 decoder — built for Starknet devs</span>
-      <span class="footer-mono">cairo · starknet · sncast</span>
+      <span>Built by <a href="https://github.com/Chibey-max" target="_blank" rel="noreferrer">Chibey-max</a> · starknet/cairo tooling</span>
+      <a href="https://github.com/Chibey-max/Felt252-Decoder" target="_blank" rel="noreferrer">Repository</a>
     </div>
   </footer>
 
   <div class="toast" id="toast"></div>
 
-  <script>
-    const EXAMPLES = [
-      { number: '2804988942864152508488475094962468554181127825702932543077', decoded: 'result would be negative', context: 'sub_num underflow guard' },
-      { number: '1709662608498200765433310943302104658958991953088', decoded: 'Caller is not the owner', context: 'onlyOwner access control' },
-      { number: '521777237', decoded: 'not divisible by zero', context: 'div_num zero guard' },
-      { number: '1650615637837965612837040', decoded: 'invalid sum logic', context: 'add_num assertion' },
-      { number: '7017280452245743462819', decoded: 'invalid sub', context: 'sub_num assertion' },
-      { number: '129045857820029803', decoded: 'invalid mul', context: 'mul_num assertion' },
-    ];
-
-    let history = [];
-    try { history = JSON.parse(localStorage.getItem('felt252_history') || '[]'); } catch {}
-
-    function decodeFelt252(raw) {
-      raw = raw.trim();
-      if (!raw) throw new Error('empty');
-      let num;
-      try { num = BigInt(raw); } catch { throw new Error('Not a valid number. Paste the raw decimal from your error trace.'); }
-      let hex = num.toString(16);
-      if (hex.length % 2 !== 0) hex = '0' + hex;
-      let str = '';
-      for (let i = 0; i < hex.length; i += 2) str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
-      const printable = str.split('').every(c => c.charCodeAt(0) >= 32 && c.charCodeAt(0) <= 126);
-      if (!printable) throw new Error('Contains non-printable characters — may not be a short string felt252.');
-      return { str, hex: '0x' + hex, charCount: str.length };
-    }
-
-    function decode() {
-      const input = document.getElementById('input').value;
-      const resultIdle = document.getElementById('resultIdle');
-      const resultOutput = document.getElementById('resultOutput');
-      const resultValue = document.getElementById('resultValue');
-      const resultMeta = document.getElementById('resultMeta');
-      try {
-        const { str, hex, charCount } = decodeFelt252(input);
-        resultIdle.classList.add('hidden');
-        resultOutput.classList.remove('hidden');
-        resultValue.textContent = str;
-        resultValue.className = 'result-value';
-        resultMeta.textContent = 'hex: ' + hex + '  ·  ' + charCount + ' chars';
-        addToHistory(input.trim(), str);
-      } catch(e) {
-        resultIdle.classList.add('hidden');
-        resultOutput.classList.remove('hidden');
-        resultValue.textContent = e.message === 'empty' ? 'No input provided.' : e.message;
-        resultValue.className = 'result-value error';
-        resultMeta.textContent = '';
-      }
-    }
-
-    function clearInput() {
-      document.getElementById('input').value = '';
-      document.getElementById('clearBtn').classList.remove('visible');
-      document.getElementById('resultIdle').classList.remove('hidden');
-      document.getElementById('resultOutput').classList.add('hidden');
-    }
-
-    async function pasteFromClipboard() {
-      try {
-        const text = await navigator.clipboard.readText();
-        document.getElementById('input').value = text;
-        document.getElementById('clearBtn').classList.add('visible');
-        decode();
-      } catch { showToast('Clipboard access denied — paste manually'); }
-    }
-
-    function copyResult() {
-      const val = document.getElementById('resultValue').textContent;
-      navigator.clipboard.writeText(val).then(() => {
-        const btn = document.getElementById('copyBtn');
-        btn.textContent = 'Copied!';
-        setTimeout(() => btn.textContent = 'Copy', 1500);
-      });
-    }
-
-    function addToHistory(number, decoded) {
-      const entry = { number, decoded, time: Date.now() };
-      history = [entry, ...history.filter(h => h.number !== number)].slice(0, 20);
-      try { localStorage.setItem('felt252_history', JSON.stringify(history)); } catch {}
-      renderHistory();
-    }
-
-    function renderHistory() {
-      const section = document.getElementById('historySection');
-      const list = document.getElementById('historyList');
-      if (history.length === 0) { section.style.display = 'none'; return; }
-      section.style.display = 'block';
-      list.innerHTML = history.map(h =>
-        '<div class="history-item" onclick="loadFromHistory(\'' + h.number + '\')">' +
-        '<span class="history-decoded">' + esc(h.decoded) + '</span>' +
-        '<span class="history-num">' + h.number + '</span>' +
-        '<span class="history-time">' + timeAgo(h.time) + '</span>' +
-        '</div>'
-      ).join('');
-    }
-
-    function loadFromHistory(number) {
-      document.getElementById('input').value = number;
-      document.getElementById('clearBtn').classList.add('visible');
-      decode();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function clearHistory() {
-      history = [];
-      try { localStorage.removeItem('felt252_history'); } catch {}
-      renderHistory();
-    }
-
-    function renderExamples() {
-      document.getElementById('examplesGrid').innerHTML = EXAMPLES.map((ex, i) =>
-        '<div class="example-card" onclick="loadExample(\'' + ex.number + '\')" style="animation-delay:' + (i * 0.05) + 's">' +
-        '<div class="example-decoded">\'' + esc(ex.decoded) + '\'</div>' +
-        '<div class="example-context">' + esc(ex.context) + '</div>' +
-        '<div class="example-number">' + ex.number.slice(0, 44) + '...</div>' +
-        '</div>'
-      ).join('');
-    }
-
-    function loadExample(number) {
-      document.getElementById('input').value = number;
-      document.getElementById('clearBtn').classList.add('visible');
-      decode();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function showToast(msg) {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 2500);
-    }
-
-    function esc(str) {
-      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    }
-
-    function timeAgo(ts) {
-      const d = Date.now() - ts;
-      if (d < 60000) return 'just now';
-      if (d < 3600000) return Math.floor(d/60000) + 'm ago';
-      if (d < 86400000) return Math.floor(d/3600000) + 'h ago';
-      return Math.floor(d/86400000) + 'd ago';
-    }
-
-    document.getElementById('input').addEventListener('input', function() {
-      document.getElementById('clearBtn').classList.toggle('visible', this.value.length > 0);
-    });
-
-    document.getElementById('input').addEventListener('keydown', function(e) {
-      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); decode(); }
-    });
-
-    renderExamples();
-    renderHistory();
-  </script>
+  <script src="./app.js"></script>
 </body>
 </html>
